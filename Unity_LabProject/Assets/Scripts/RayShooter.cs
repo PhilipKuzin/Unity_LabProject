@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -21,15 +22,7 @@ public class RayShooter : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
-            Vector3 point = new Vector3(_camera.pixelWidth / 2, _camera.pixelHeight / 2, 0);
-            Ray ray = _camera.ScreenPointToRay(point);
-
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                StartCoroutine(SphereIndicator(hit.point));
-            }
+            Shoot();
         }
     }
 
@@ -46,11 +39,27 @@ public class RayShooter : MonoBehaviour
         _damager = damager;
     }
 
+    private void Shoot()
+    {
+        Vector3 point = new Vector3(_camera.pixelWidth / 2, _camera.pixelHeight / 2, 0);
+        Ray ray = _camera.ScreenPointToRay(point);
+
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            GameObject hitObject = hit.transform.gameObject;
+
+            if (hitObject.TryGetComponent(out Enemy enemy))
+                enemy.TakeDamage(10);
+            else
+                StartCoroutine(SphereIndicator(hit.point));
+        }
+    }
+
     private IEnumerator SphereIndicator(Vector3 point)
     {
         GameObject obj = _damager.Shoot(point);
 
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(1);
 
         Destroy(obj);
     }
